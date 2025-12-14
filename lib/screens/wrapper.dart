@@ -1,38 +1,53 @@
-// lib/screens/wrapper.dart
-import 'package:flutter/material.dart';
+// lib/services/auth_service.dart (UPDATED)
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/auth_service.dart';
-import 'auth/login_screen.dart'; // Create this screen next
-import 'home/home_screen.dart'; // Create this screen next
 
-class Wrapper extends StatelessWidget {
-  const Wrapper({super.key});
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  @override
-  Widget build(BuildContext context) {
-    // Listen to the auth state changes stream
-    return StreamBuilder<User?>(
-      stream: AuthService().authStateChanges,
-      builder: (context, snapshot) {
-        // 
+  // 1. Define the stream getter here! This is what Wrapper uses.
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading indicator while checking the initial auth state
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
 
-        final user = snapshot.data;
+  // Sign Up with email and password
+  Future<String?> signUp({required String email, required String password}) async {
+    // ... (rest of the code)
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
 
-        if (user == null) {
-          // User is not signed in, show the Login/Sign Up screen
-          return const LoginScreen();
-        } else {
-          // User is signed in, show the Home screen
-          return const HomeScreen();
-        }
-      },
-    );
+  // Sign In with email and password
+  Future<String?> signIn({required String email, required String password}) async {
+    // ... (rest of the code)
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        return 'Invalid credentials. Please check your email and password.';
+      }
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // Sign Out
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 }
