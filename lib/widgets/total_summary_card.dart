@@ -15,8 +15,9 @@ class TotalSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.currency(symbol: '\$');
+
     
-    // Sort categories by amount descending for the list
+    // Sort categories by amount descending for the list //sortin
     final sortedCategories = categoryTotals.entries
         .where((e) => e.key != 'All')
         .toList()
