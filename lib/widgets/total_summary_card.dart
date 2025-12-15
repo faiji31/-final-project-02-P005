@@ -58,7 +58,7 @@ class TotalSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Category Breakdown List (Scrollable)
+            // Category 
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 120), // Limit height for cleaner UI
               child: ListView.builder(
