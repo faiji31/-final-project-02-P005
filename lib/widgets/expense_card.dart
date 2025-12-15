@@ -1,3 +1,4 @@
+// lib/widgets/expense_card.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/expense_model.dart';
@@ -10,6 +11,7 @@ class ExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Helper to get a category-specific icon
     IconData getCategoryIcon(String category) {
       switch (category) {
         case 'Food': return Icons.fastfood;
@@ -22,6 +24,7 @@ class ExpenseCard extends StatelessWidget {
       }
     }
 
+    // Helper to format currency
     final currencyFormatter = NumberFormat.currency(symbol: '\$');
 
     return Card(
