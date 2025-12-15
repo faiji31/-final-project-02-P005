@@ -65,9 +65,9 @@ class TotalSummaryCard extends StatelessWidget {
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(), // Use ScrollController on parent if needed
-                itemCount: sortedCategories.length,
+                itemCount: sortedCategories.length, 
                 itemBuilder: (context, index) {
-                  final entry = sortedCategories[index];
+                  final entry = sortedCategories[index]; 
                   if (entry.value == 0) return const SizedBox.shrink(); // Hide zero entries
 
                   final percentage = grandTotal > 0 ? (entry.value / grandTotal) : 0.0;
