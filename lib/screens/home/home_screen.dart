@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'Logout',
           ),
         ],
-      ),
+      ), // Appbar
       body: const ExpenseListScreen(),
     );
   }
