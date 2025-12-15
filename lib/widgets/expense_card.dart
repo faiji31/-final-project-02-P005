@@ -50,7 +50,7 @@ class ExpenseCard extends StatelessWidget {
             Text(
               '${expense.category} | ${DateFormat('MMM d, yyyy').format(expense.date)}',
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
+            ), //date colour
             if (expense.description != null && expense.description!.isNotEmpty)
               Text(
                 expense.description!,
