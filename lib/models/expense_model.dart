@@ -42,7 +42,6 @@ class Expense {
       category: data['category'] as String,
       description: data['description'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      // userId: data['userId'] as String,
       userId: data['userId'] as String,
     );
   }
