@@ -1,5 +1,5 @@
 // lib/screens/home/home_screen.dart
-import 'dart:async'; // Add this import for Timer
+import 'dart:async'; // Timer import added
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../expenses/expense_list_screen.dart';
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final DateTime currentDate = DateTime.now();
-
+    
     return Scaffold(
       body: Column(
         children: [
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         textAlign: TextAlign.left,
                       ),
                     ),
-
+                    
                     // Logout Icon
                     IconButton(
                       icon: Icon(
@@ -128,16 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-
+                    
                     // User Details
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _userEmail.isNotEmpty
-                                ? _userEmail.split('@')[0]
-                                : 'User',
+                            _userEmail.isNotEmpty ? _userEmail.split('@')[0] : 'User',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -156,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-
+                    
                     // Current Time - Replaces "24"
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -168,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        _currentTime.isEmpty
+                        _currentTime.isEmpty 
                             ? DateFormat('hh:mm a').format(DateTime.now())
                             : _currentTime,
                         style: const TextStyle(
@@ -231,50 +229,52 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.logout_rounded,
+              color: const Color(0xFFdc2626),
+              size: 22,
             ),
-            title: Row(
-              children: [
-                Icon(
-                  Icons.logout_rounded,
-                  color: const Color(0xFFdc2626),
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-                const Text('Logout', style: TextStyle(fontSize: 18)),
-              ],
+            const SizedBox(width: 10),
+            const Text(
+              'Logout',
+              style: TextStyle(fontSize: 18),
             ),
-            content: const Text(
-              'Are you sure you want to logout?',
-              style: TextStyle(fontSize: 14),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF6b7280),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF6b7280),
-                ),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await AuthService().signOut();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFdc2626),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text('Logout'),
-              ),
-            ],
+            child: const Text('Cancel'),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await AuthService().signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFdc2626),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -386,10 +386,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           final expense = filteredExpenses[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            child: ExpenseCard(
-                              expense: expense,
-                              onTap: () => _navigateToEditExpense(context, expense),
-                            ),
+                            child: _buildDismissibleExpenseCard(context, expense),
                           );
                         },
                       ),
@@ -401,15 +398,103 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     );
   }
 
+  Widget _buildDismissibleExpenseCard(BuildContext context, Expense expense) {
+    return Dismissible(
+      key: ValueKey(expense.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(Icons.delete_rounded, color: Colors.white, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  Icon(Icons.delete_outline_rounded, color: Colors.red.shade400),
+                  const SizedBox(width: 10),
+                  const Text("Delete Expense"),
+                ],
+              ),
+              content: Text("Are you sure you want to delete '${expense.name}'?"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.grey.shade600,
+                  ),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Delete"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        _firestoreService.deleteExpense(expense.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${expense.name} deleted'),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+      child: ExpenseCard(
+        expense: expense,
+        onTap: () => _navigateToEditExpense(context, expense),
+      ),
+    );
+  }
+
   void _navigateToAddExpense(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ManageExpenseScreen()),
+      MaterialPageRoute(
+        builder: (context) => const ManageExpenseScreen(),
+      ),
     );
   }
 
   void _navigateToEditExpense(BuildContext context, Expense expense) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => ManageExpenseScreen(expenseToEdit: expense)),
+      MaterialPageRoute(
+        builder: (context) => ManageExpenseScreen(expenseToEdit: expense),
+      ),
     );
   }
 }

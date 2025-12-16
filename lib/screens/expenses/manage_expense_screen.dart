@@ -80,7 +80,7 @@ class _ManageExpenseScreenState extends State<ManageExpenseScreen> {
                 ? null
                 : _descriptionController.text.trim(),
         createdAt: isEditing ? widget.expenseToEdit!.createdAt : DateTime.now(),
-        userId: userId, // CRITICAL: Ensure userId is set here
+        userId: userId,
       );
 
       if (!isEditing) {
@@ -92,9 +92,12 @@ class _ManageExpenseScreenState extends State<ManageExpenseScreen> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save expense: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save expense: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -113,6 +116,11 @@ class _ManageExpenseScreenState extends State<ManageExpenseScreen> {
         title: Text(isEditing ? 'Edit Expense' : 'Add New Expense'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: true, // This enables back button
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -121,25 +129,47 @@ class _ManageExpenseScreenState extends State<ManageExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              // Expense Name Field
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Expense Name',
-                  prefixIcon: Icon(Icons.label_outline),
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.grey.shade700),
+                  prefixIcon: Icon(Icons.label_outline, color: Theme.of(context).primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
+                style: const TextStyle(fontSize: 16),
                 validator: (val) => val!.trim().isEmpty ? 'Enter a name' : null,
               ),
               const SizedBox(height: 16),
 
+              // Amount Field
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Amount',
-                  prefixIcon: Icon(Icons.attach_money),
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.grey.shade700),
+                  prefixIcon: Icon(Icons.attach_money, color: Theme.of(context).primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
+                style: const TextStyle(fontSize: 16),
                 validator: (val) {
                   if (val!.trim().isEmpty) return 'Enter an amount';
                   if (double.tryParse(val) == null || double.parse(val) <= 0) {
@@ -150,77 +180,114 @@ class _ManageExpenseScreenState extends State<ManageExpenseScreen> {
               ),
               const SizedBox(height: 16),
 
-              ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: Text(
-                  'Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+              // Date Picker
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                trailing: const Icon(Icons.edit),
-                onTap: _pickDate,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  side: const BorderSide(color: Colors.grey),
+                child: ListTile(
+                  leading: Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  trailing: const Icon(Icons.edit, color: Colors.grey),
+                  onTap: _pickDate,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
 
+              // Category Dropdown
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(Icons.category_outlined),
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.grey.shade700),
+                  prefixIcon: Icon(Icons.category_outlined, color: Theme.of(context).primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
-                items:
-                    Expense.categories.map((String category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
+                items: Expense.categories.map((String category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(
+                      category,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  );
+                }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _selectedCategory = newValue!;
+                    if (newValue != null) {
+                      _selectedCategory = newValue;
+                    }
                   });
                 },
+                style: const TextStyle(fontSize: 16, color: Colors.black),
               ),
               const SizedBox(height: 16),
 
+              // Description Field
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Description (Optional)',
-                  prefixIcon: Icon(Icons.notes),
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.grey.shade700),
                   alignLabelWithHint: true,
+                  prefixIcon: Icon(Icons.notes, color: Theme.of(context).primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
+                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 32),
 
+              // Save/Update Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _isLoading ? null : _saveExpense,
-                  icon:
-                      _isLoading
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                          : Icon(isEditing ? Icons.save : Icons.add),
-                  label: Text(isEditing ? 'Update Expense' : 'Add Expense'),
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Icon(isEditing ? Icons.save : Icons.add),
+                  label: Text(
+                    _isLoading ? 'Saving...' : (isEditing ? 'Update Expense' : 'Add Expense'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    elevation: 2,
                   ),
                 ),
               ),
