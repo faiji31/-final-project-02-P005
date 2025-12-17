@@ -1,7 +1,9 @@
 // lib/screens/home/home_screen.dart
-import 'dart:async'; // Timer import added
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../services/firestore_service.dart'; // Add this import
+import '../../models/expense_model.dart'; // Add this import
 import '../expenses/expense_list_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -14,15 +16,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _userEmail = '';
-  double _monthlySpent = 1850.75;
+  double _monthlySpent = 0.0; // Initialize to 0.0
   String _currentTime = '';
   Timer? _timer;
+  final FirestoreService _firestoreService = FirestoreService(); // Add Firestore service
 
   @override
   void initState() {
     super.initState();
     _loadUserEmail();
     _updateTime();
+    _loadMonthlySpent(); // Load monthly spent data
+    
     // Update time every minute
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       _updateTime();
@@ -50,6 +55,40 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _loadMonthlySpent() async {
+    try {
+      // Get current month's start and end dates
+      final now = DateTime.now();
+      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+      final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+      // Get all expenses for the current user
+      _firestoreService.getExpensesStream().listen((List<Expense> expenses) {
+        // Filter expenses for current month
+        final monthlyExpenses = expenses.where((expense) {
+          return expense.date.isAfter(firstDayOfMonth.subtract(const Duration(days: 1))) &&
+                 expense.date.isBefore(lastDayOfMonth.add(const Duration(days: 1)));
+        }).toList();
+
+        // Calculate total for current month
+        double total = 0.0;
+        for (var expense in monthlyExpenses) {
+          total += expense.amount;
+        }
+
+        // Update UI
+        if (mounted) {
+          setState(() {
+            _monthlySpent = total;
+          });
+        }
+      });
+    } catch (e) {
+      print('Error loading monthly spent: $e');
+      // Keep the default value (0.0)
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final DateTime currentDate = DateTime.now();
@@ -65,8 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF6366f1), // Indigo-500
-                  const Color(0xFF8b5cf6), // Violet-500
+                  const Color(0xFF6366f1),
+                  const Color(0xFF8b5cf6),
                 ],
               ),
               borderRadius: const BorderRadius.only(
@@ -155,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     
-                    // Current Time - Replaces "24"
+                    // Current Time
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -200,11 +239,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '\$$_monthlySpent',
+                        // Format the amount with 2 decimal places
+                        NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(_monthlySpent),
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'for ${DateFormat('MMMM yyyy').format(currentDate)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white.withOpacity(0.8),
                         ),
                       ),
                     ],
