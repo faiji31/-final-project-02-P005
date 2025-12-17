@@ -386,7 +386,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           final expense = filteredExpenses[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            child: _buildDismissibleExpenseCard(context, expense),
+                            child: _buildExpenseCardWithDelete(context, expense),
                           );
                         },
                       ),
@@ -398,7 +398,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     );
   }
 
-  Widget _buildDismissibleExpenseCard(BuildContext context, Expense expense) {
+  Widget _buildExpenseCardWithDelete(BuildContext context, Expense expense) {
     return Dismissible(
       key: ValueKey(expense.id),
       direction: DismissDirection.endToStart,
@@ -463,21 +463,69 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         );
       },
       onDismissed: (direction) {
-        _firestoreService.deleteExpense(expense.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${expense.name} deleted'),
-            backgroundColor: Colors.red.shade400,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
+        _deleteExpense(context, expense);
       },
       child: ExpenseCard(
         expense: expense,
         onTap: () => _navigateToEditExpense(context, expense),
+        onDelete: () => _showDeleteConfirmationDialog(context, expense),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, Expense expense) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.delete_outline_rounded, color: Colors.red.shade400),
+              const SizedBox(width: 10),
+              const Text("Delete Expense"),
+            ],
+          ),
+          content: Text("Are you sure you want to delete '${expense.name}'?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade600,
+              ),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteExpense(context, expense);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade400,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteExpense(BuildContext context, Expense expense) {
+    _firestoreService.deleteExpense(expense.id);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${expense.name} deleted'),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
